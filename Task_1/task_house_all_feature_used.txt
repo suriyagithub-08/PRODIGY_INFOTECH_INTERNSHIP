@@ -1,0 +1,47 @@
+### THIS CODE PREDICTS USING WHOLE FEATURES FROM THE DATA SET
+
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.impute import SimpleImputer
+
+# Load train and test data from CSV files
+train_df = pd.read_csv(r"C:\Users\suriya\Downloads\house-prices-advanced-regression-techniques\train.csv")
+test_df = pd.read_csv(r"C:\Users\suriya\Downloads\house-prices-advanced-regression-techniques\test.csv")
+
+# One-hot encoding categorical variables
+train_df = pd.get_dummies(train_df)
+test_df = pd.get_dummies(test_df)
+
+# Aligning train and test data after one-hot encoding
+train_df, test_df = train_df.align(test_df, join='left', axis=1)  # Ensure train and test have the same columns
+
+# Selecting all features except the target variable for training
+X_train = train_df.drop(columns=['SalePrice'])
+
+# Extracting the target variable for training
+y_train = train_df['SalePrice']
+
+# Selecting all features for testing and removing 'SalePrice'
+X_test = test_df.drop(columns=['SalePrice'])
+
+# Impute missing values
+imputer = SimpleImputer(strategy='mean')
+X_train_imputed = imputer.fit_transform(X_train)
+X_test_imputed = imputer.transform(X_test)
+
+# Creating a Linear Regression model
+model = LinearRegression()
+
+# Training the model
+model.fit(X_train_imputed, y_train)
+
+# Making predictions on the test set
+predictions = model.predict(X_test_imputed)
+
+# Adding predictions to the test DataFrame
+test_df['PredictedSalePrice'] = predictions
+
+# Saving predictions to a CSV file
+test_df.to_csv('new_predictions.csv', index=False)
+
+print("Predictions saved to new_predictions.csv")
